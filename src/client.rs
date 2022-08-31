@@ -475,8 +475,25 @@ impl Client {
     /// WebDriver standard.
     #[cfg_attr(docsrs, doc(alias = "Get Window Rect"))]
     pub async fn get_window_size(&self) -> Result<(u64, u64), error::CmdError> {
-        let (_, _, width, height) = self.get_window_rect().await?;
-        Ok((width, height))
+
+        //NOTE: *klebs changes are here*
+        match self.issue(WebDriverCommand::GetWindowRect).await? {
+            Json::Object(mut obj) => {
+
+                let width = match obj.remove("width").and_then(|width| width.as_u64()) {
+                    Some(width) => width,
+                    None => return Err(error::CmdError::NotW3C(Json::Object(obj))),
+                };
+
+                let height = match obj.remove("height").and_then(|height| height.as_u64()) {
+                    Some(height) => height,
+                    None => return Err(error::CmdError::NotW3C(Json::Object(obj))),
+                };
+
+                Ok((width, height))
+            }
+            v => Err(error::CmdError::NotW3C(v)),
+        }
     }
 
     /// Sets the x, y, width, and height properties of the current window.
