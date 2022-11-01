@@ -2,7 +2,7 @@
 
 use crate::wd::Locator;
 use crate::{error, Client};
-use serde::Serialize;
+use serde::{Serialize};
 use serde_json::Value as Json;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
